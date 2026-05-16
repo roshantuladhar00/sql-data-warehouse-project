@@ -5,8 +5,8 @@ Stored Procedure: Load Bronze Layer
 Script Purpose:
   This stored procedure loads data into the 'bronze' schema from external CSV files.
   It performs the following actions:
-  - Truncate the bronze tables before loading data.
-  - Uses the 'BULK INSERT' command to load data from csv files to bronze tables.
+  - Truncates the bronze tables before loading data.
+  - Uses the 'BULK INSERT' command to load data from CSV files to bronze tables.
 
 Parameters:
   None.
@@ -16,6 +16,7 @@ Usage Example:
   EXEC bronze.load_bronze;
 ==============================================================================================
 */
+
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS
 BEGIN
 	DECLARE @start_time DATETIME, @end_time DATETIME, @start_complete_time DATETIME, @end_complete_time DATETIME;
@@ -41,7 +42,7 @@ BEGIN
 			TABLOCK
 		);
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '--------------------------------';
 
 		SET @start_time = GETDATE();
@@ -56,7 +57,7 @@ BEGIN
 			TABLOCK
 		);
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '--------------------------------';
 
 		SET @start_time = GETDATE();
@@ -71,13 +72,13 @@ BEGIN
 			TABLOCK
 		);
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '--------------------------------';
 
 		PRINT '------------------------------------------';
 		PRINT 'Loading ERP Tables';
 		PRINT '------------------------------------------';
-		
+
 		SET @start_time = GETDATE();
 		PRINT '>> Truncating Table: bronze.erp_cust_az12';
 		TRUNCATE TABLE bronze.erp_cust_az12;
@@ -90,7 +91,7 @@ BEGIN
 			TABLOCK
 		);
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '--------------------------------';
 
 		SET @start_time = GETDATE();
@@ -105,14 +106,16 @@ BEGIN
 			TABLOCK
 		);
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '--------------------------------';
 
 		SET @start_time = GETDATE();
-		PRINT '>> Truncating Table: bronze.px_cat_g1v2';
-		TRUNCATE TABLE bronze.px_cat_g1v2;
-		PRINT '>> Inserting Data into: bronze.px_cat_g1v2';
-		BULK INSERT bronze.px_cat_g1v2
+		-- FIX (Bug 3): Updated from bronze.px_cat_g1v2 to bronze.erp_px_cat_g1v2
+		-- to match the corrected DDL and the erp_ prefix convention.
+		PRINT '>> Truncating Table: bronze.erp_px_cat_g1v2';
+		TRUNCATE TABLE bronze.erp_px_cat_g1v2;
+		PRINT '>> Inserting Data into: bronze.erp_px_cat_g1v2';
+		BULK INSERT bronze.erp_px_cat_g1v2
 		FROM 'D:\Data Analytics\SQL with BARAA\sql-data-warehouse-project-main\datasets\source_erp\px_cat_g1v2.csv'
 		WITH (
 			FIRSTROW = 2,
@@ -120,8 +123,9 @@ BEGIN
 			TABLOCK
 		);
 		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second,@start_time,@end_time) AS NVARCHAR) + ' seconds';
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '--------------------------------';
+
 		SET @end_complete_time = GETDATE();
 		PRINT 'Loading Bronze Layer is complete';
 		PRINT '>> Bronze Layer Loading Duration: ' + CAST(DATEDIFF(second, @start_complete_time, @end_complete_time) AS NVARCHAR) + ' seconds';
@@ -129,9 +133,9 @@ BEGIN
 	BEGIN CATCH
 		PRINT '==================================================';
 		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER';
-		PRINT 'ERROR ' + ERROR_MESSAGE();
-		PRINT 'ERROR ' + CAST(ERROR_NUMBER() AS NVARCHAR);
-		PRINT 'ERROR ' + CAST(ERROR_STATE() AS NVARCHAR);
+		PRINT 'ERROR MESSAGE : ' + ERROR_MESSAGE();
+		PRINT 'ERROR NUMBER  : ' + CAST(ERROR_NUMBER() AS NVARCHAR);
+		PRINT 'ERROR STATE   : ' + CAST(ERROR_STATE() AS NVARCHAR);
 		PRINT '==================================================';
 	END CATCH
 END
