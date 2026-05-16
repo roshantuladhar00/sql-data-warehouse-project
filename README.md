@@ -36,27 +36,15 @@ The primary objectives are:
 
 The warehouse follows the **Medallion Architecture**, a three-layer design pattern where data progresses from raw to refined:
 
-```
-Sources (CSV Files)
-    |
-    v
-[Bronze Layer]  -- Raw ingestion, no transformation
-    |
-    v
-[Silver Layer]  -- Cleaned, standardized, deduplicated
-    |
-    v
-[Gold Layer]    -- Business-ready Star Schema views
-    |
-    v
-Consume (BI Tools / Reporting)
-```
+![Data Warehouse Architecture](docs/Data_Warehouse_Structure.png)
 
-| Layer  | Object Type | Load Strategy              | Transformation     | Data Model     |
-|--------|-------------|----------------------------|--------------------|----------------|
-| Bronze | Tables      | Full Load / Truncate Insert | None               | None           |
-| Silver | Tables      | Full Load / Truncate Insert | Cleansing, casting | None           |
-| Gold   | Views       | On read                    | Joins, enrichment  | Star Schema    |
+| Layer  | Object Type | Load Strategy               | Transformation     | Data Model  |
+|--------|-------------|-----------------------------|--------------------|-------------|
+| Bronze | Tables      | Full Load / Truncate Insert | None               | None        |
+| Silver | Tables      | Full Load / Truncate Insert | Cleansing, casting | None        |
+| Gold   | Views       | On read                     | Joins, enrichment  | Star Schema |
+
+![Data Flow Diagram](docs/Data_Flow_Diagram.png)
 
 ---
 
@@ -172,39 +160,7 @@ The Gold layer consists of SQL views that join and enrich Silver tables into a S
 
 ## Star Schema (Gold)
 
-```
-                    +------------------+
-                    |  dim_customers   |
-                    |------------------|
-                    | customer_key (PK)|
-                    | customer_id      |
-                    | customer_number  |
-                    | first_name       |
-                    | last_name        |
-                    | country          |
-                    | gender           |
-                    | marital_status   |
-                    | date_of_birth    |
-                    | create_date      |
-                    +--------+---------+
-                             |
-                             |
-+------------------+   +-----+----------+   +------------------+
-|  dim_products    |   |   fact_sales   |   |                  |
-|------------------|   |----------------|   |                  |
-| product_key (PK) +---+ product_key(FK)|   |                  |
-| product_id       |   | customer_key(FK+---+                  |
-| product_number   |   | order_number   |   |                  |
-| product_name     |   | order_date     |   |                  |
-| category_id      |   | shipping_date  |   |                  |
-| category         |   | due_date       |   |                  |
-| sub_category     |   | sales          |   |                  |
-| maintenance      |   | quantity       |   |                  |
-| product_cost     |   | price          |   |                  |
-| product_line     |   +----------------+   |                  |
-| start_date       |                        |                  |
-+------------------+                        +------------------+
-```
+![Sales Data Mart Star Schema](docs/Sales_Data_Mart.png)
 
 The `fact_sales` view links to both dimension views through surrogate keys (`product_key`, `customer_key`) generated via `ROW_NUMBER()`.
 
