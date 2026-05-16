@@ -78,7 +78,6 @@ sql-data-warehouse-project/
 |   |-- gold/
 |       |-- ddl_gold.sql           -- Create gold views
 |
-|-- tests/
 |-- init_database.sql              -- Database and schema initialization
 |-- LICENSE
 |-- README.md
